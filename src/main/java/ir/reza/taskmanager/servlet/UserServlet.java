@@ -1,10 +1,11 @@
-
 package ir.reza.taskmanager.servlet;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import ir.reza.taskmanager.dto.request.UserRequestDto;
-import ir.reza.taskmanager.dto.response.UserResponseDto;
 import ir.reza.taskmanager.exception.DuplicateResourceException;
+import ir.reza.taskmanager.exception.ResourceNotFoundException;
 import ir.reza.taskmanager.service.UserService;
+import ir.reza.taskmanager.util.JsonUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,8 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
 
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
@@ -36,60 +35,30 @@ public class UserServlet extends HttpServlet {
             HttpServletResponse response
     ) throws IOException {
 
-        response.setContentType("text/html;charset=UTF-8");
+        try {
+            String idParameter = request.getParameter("id");
 
-        List<UserResponseDto> users = userService.findAll();
+            if (idParameter != null) {
+                long id = Long.parseLong(idParameter);
 
-        PrintWriter out = response.getWriter();
+                if (id <= 0) {
+                    JsonUtil.error(response, 400, "User ID must be positive.");
+                    return;
+                }
 
-        out.println("<!DOCTYPE html>");
-        out.println("<html lang='en'>");
-        out.println("<head>");
-        out.println("<meta charset='UTF-8'>");
-        out.println("<title>Users</title>");
-        out.println("</head>");
-        out.println("<body>");
+                JsonUtil.send(response, 200, userService.findById(id));
+                return;
+            }
 
-        out.println("<h1>Users</h1>");
+            JsonUtil.send(response, 200, userService.findAll());
 
-        out.println("<table border='1' cellpadding='8'>");
-        out.println("<tr>");
-        out.println("<th>ID</th>");
-        out.println("<th>Name</th>");
-        out.println("<th>Email</th>");
-        out.println("</tr>");
-
-        for (UserResponseDto user : users) {
-            out.println("<tr>");
-            out.println("<td>" + user.id() + "</td>");
-            out.println("<td>" + escapeHtml(user.name()) + "</td>");
-            out.println("<td>" + escapeHtml(user.email()) + "</td>");
-            out.println("</tr>");
+        } catch (NumberFormatException exception) {
+            JsonUtil.error(response, 400, "Invalid user ID.");
+        } catch (ResourceNotFoundException exception) {
+            JsonUtil.error(response, 404, exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            JsonUtil.error(response, 400, exception.getMessage());
         }
-
-        out.println("</table>");
-
-        out.println("<h2>Add User</h2>");
-        out.println("<form method='post' action='"
-                + request.getContextPath() + "/users'>");
-
-        out.println("<label>Name:</label>");
-        out.println("<input type='text' name='name' required>");
-        out.println("<br><br>");
-
-        out.println("<label>Email:</label>");
-        out.println("<input type='email' name='email' required>");
-        out.println("<br><br>");
-
-        out.println("<button type='submit'>Add User</button>");
-        out.println("</form>");
-
-        out.println("<br><a href='"
-                + request.getContextPath()
-                + "/tasks'>Back to Tasks</a>");
-
-        out.println("</body>");
-        out.println("</html>");
     }
 
     @Override
@@ -100,57 +69,27 @@ public class UserServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String name = request.getParameter("name");
-        String email = request.getParameter("email");
-
-        if (name == null || name.isBlank()
-                || email == null || email.isBlank()) {
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Name and email are required."
-            );
-            return;
-        }
-
         try {
-            UserRequestDto dto = new UserRequestDto(
-                    name.trim(),
-                    email.trim()
+            UserRequestDto dto = JsonUtil.read(
+                    request.getReader().lines()
+                            .collect(java.util.stream.Collectors.joining("\n")),
+                    UserRequestDto.class
             );
 
-            userService.add(dto);
+            if (dto.name() == null || dto.name().isBlank()
+                    || dto.email() == null || dto.email().isBlank()) {
+                JsonUtil.error(response, 400, "Name and email are required.");
+                return;
+            }
 
-            response.sendRedirect(
-                    request.getContextPath() + "/users"
-            );
+            JsonUtil.send(response, 201, userService.add(dto));
 
+        } catch (JsonProcessingException exception) {
+            JsonUtil.error(response, 400, "Invalid JSON request body.");
         } catch (DuplicateResourceException exception) {
-            response.setStatus(
-                    HttpServletResponse.SC_CONFLICT
-            );
-            response.setContentType("text/html;charset=UTF-8");
-
-            response.getWriter().println(
-                    "<h1>Email already exists</h1>"
-            );
-
-            response.getWriter().println(
-                    "<a href='" + request.getContextPath()
-                            + "/users'>Back to Users</a>"
-            );
+            JsonUtil.error(response, 409, exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            JsonUtil.error(response, 400, exception.getMessage());
         }
-    }
-
-    private String escapeHtml(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        return value
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#39;");
     }
 }
