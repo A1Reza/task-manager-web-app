@@ -1,8 +1,18 @@
-### User Servlet Requests
 
-### 1. Get all users
+### Get all users
 GET http://localhost:8080/task_manager_war/users
-Accept: text/html
 
-### 2. Check users endpoint
+### Add a new user
+POST http://localhost:8080/task_manager_war/users
+Content-Type: application/x-www-form-urlencoded
+
+name=Ali&email=ali@example.com
+
+### Get all users after adding
 GET http://localhost:8080/task_manager_war/users
+
+### Add duplicate email (should return 409)
+POST http://localhost:8080/task_manager_war/users
+Content-Type: application/x-www-form-urlencoded
+
+name=Another Ali&email=ali@example.com

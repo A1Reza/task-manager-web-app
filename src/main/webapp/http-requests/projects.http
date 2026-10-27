@@ -1,0 +1,18 @@
+
+### Get all projects
+GET http://localhost:8080/task_manager_war/projects
+
+### Add a new project
+POST http://localhost:8080/task_manager_war/projects
+Content-Type: application/x-www-form-urlencoded
+
+name=E-Commerce&description=Online shopping application
+
+### Get all projects after adding
+GET http://localhost:8080/task_manager_war/projects
+
+### Add project without a name (should return 400)
+POST http://localhost:8080/task_manager_war/projects
+Content-Type: application/x-www-form-urlencoded
+
+name=&description=Project without a name
