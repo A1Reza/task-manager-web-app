@@ -1,6 +1,5 @@
 "use strict";
 
-// Automatically detect the deployed application context path.
 const contextPath = window.location.pathname
     .replace(/\/index\.html$/, "")
     .replace(/\/$/, "");
@@ -11,7 +10,8 @@ const API = {
     updateTask: `${contextPath}/tasks/update`,
     deleteTask: `${contextPath}/tasks/delete`,
     users: `${contextPath}/users`,
-    projects: `${contextPath}/projects`
+    projects: `${contextPath}/projects`,
+    visits: `${contextPath}/visits`
 };
 
 const state = {
@@ -38,13 +38,17 @@ function escapeHtml(value) {
 }
 
 function initials(name) {
-    const parts = String(name || "?").trim().split(/\s+/);
-    return parts.slice(0, 2).map(part => part.charAt(0)).join("").toUpperCase();
+    return String(name || "?")
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(part => part.charAt(0))
+        .join("")
+        .toUpperCase();
 }
 
 function formatMinutes(value) {
-    const minutes = Number(value) || 0;
-    return `${minutes.toLocaleString()} min`;
+    return `${(Number(value) || 0).toLocaleString()} min`;
 }
 
 function showNotice(message, isError = false) {
@@ -55,6 +59,7 @@ function showNotice(message, isError = false) {
     notice.classList.remove("hidden");
 
     clearTimeout(noticeTimer);
+
     noticeTimer = setTimeout(() => {
         notice.classList.add("hidden");
     }, 4500);
@@ -92,34 +97,25 @@ async function apiRequest(url, options = {}) {
             }
 
             throw new Error(
-                "The server returned a non-JSON response. Check the servlet URL and deployment."
+                "The server returned a non-JSON response. Check the servlet URL."
             );
         }
     }
 
     if (!response.ok) {
-        const message = data?.message || data?.error ||
-            `Request failed with HTTP ${response.status}.`;
-
-        throw new Error(message);
+        throw new Error(
+            data?.message || data?.error ||
+            `Request failed with HTTP ${response.status}.`
+        );
     }
 
     return data;
 }
 
 function normalizeList(data, propertyName) {
-    if (Array.isArray(data)) {
-        return data;
-    }
-
-    if (Array.isArray(data?.[propertyName])) {
-        return data[propertyName];
-    }
-
-    if (Array.isArray(data?.items)) {
-        return data.items;
-    }
-
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.[propertyName])) return data[propertyName];
+    if (Array.isArray(data?.items)) return data.items;
     return [];
 }
 
@@ -146,9 +142,7 @@ const pageTitles = {
 };
 
 function navigateTo(page) {
-    if (!pageTitles[page]) {
-        page = "dashboard";
-    }
+    if (!pageTitles[page]) page = "dashboard";
 
     document.querySelectorAll(".page-section").forEach(section => {
         section.classList.toggle("hidden", section.id !== `page-${page}`);
@@ -174,9 +168,7 @@ document.querySelectorAll(".nav-link").forEach(link => {
 });
 
 document.querySelectorAll("[data-go]").forEach(button => {
-    button.addEventListener("click", () => {
-        navigateTo(button.dataset.go);
-    });
+    button.addEventListener("click", () => navigateTo(button.dataset.go));
 });
 
 window.addEventListener("hashchange", () => {
@@ -190,11 +182,28 @@ document.getElementById("dashboard-add-task").addEventListener("click", () => {
 });
 
 // -------------------------
+// Session visits
+// -------------------------
+
+async function loadVisits() {
+    const data = await apiRequest(API.visits);
+    const visitCount = Number(data?.visitCount);
+
+    if (!Number.isFinite(visitCount)) {
+        throw new Error("The visits endpoint did not return a valid visitCount.");
+    }
+
+    document.getElementById("stat-visits").textContent =
+        visitCount.toLocaleString();
+}
+
+// -------------------------
 // Tasks
 // -------------------------
 
 async function loadTasks() {
     const data = await apiRequest(API.tasks);
+
     state.tasks = normalizeList(data, "tasks");
 
     renderTasks();
@@ -247,8 +256,8 @@ function renderTaskRows(tasks) {
 }
 
 function renderTasks() {
-    const search = document.getElementById("task-search").value
-        .trim().toLowerCase();
+    const search = document.getElementById("task-search")
+        .value.trim().toLowerCase();
 
     const selectedUserId = document.getElementById("task-filter-user").value;
 
@@ -267,7 +276,8 @@ function renderTasks() {
     });
 
     document.getElementById("task-count").textContent = filteredTasks.length;
-    document.getElementById("tasks-body").innerHTML = renderTaskRows(filteredTasks);
+    document.getElementById("tasks-body").innerHTML =
+        renderTaskRows(filteredTasks);
 }
 
 function renderRecentTasks() {
@@ -370,6 +380,7 @@ function startTaskEdit(taskId) {
     document.getElementById("task-cancel-edit").classList.remove("hidden");
 
     navigateTo("tasks");
+
     document.getElementById("task-form-panel").scrollIntoView({
         behavior: "smooth",
         block: "start"
@@ -379,28 +390,27 @@ function startTaskEdit(taskId) {
 document.getElementById("task-form").addEventListener("submit", async event => {
     event.preventDefault();
 
-    const form = event.currentTarget;
     const submitButton = document.getElementById("task-submit");
 
     const title = document.getElementById("task-title").value.trim();
-    const estimatedMinutes = Number(document.getElementById("task-minutes").value);
+    const estimatedMinutes = Number(
+        document.getElementById("task-minutes").value
+    );
     const assigneeId = Number(document.getElementById("task-assignee").value);
     const projectId = Number(document.getElementById("task-project").value);
 
-    if (!title || !Number.isInteger(estimatedMinutes) || estimatedMinutes <= 0 ||
+    if (!title ||
+        !Number.isInteger(estimatedMinutes) || estimatedMinutes <= 0 ||
         !Number.isInteger(assigneeId) || assigneeId <= 0 ||
         !Number.isInteger(projectId) || projectId <= 0) {
-        showNotice("Enter a title, positive estimated minutes, user, and project.", true);
+        showNotice(
+            "Enter a title, positive estimated minutes, user, and project.",
+            true
+        );
         return;
     }
 
-    const payload = {
-        title,
-        estimatedMinutes,
-        assigneeId,
-        projectId
-    };
-
+    const payload = { title, estimatedMinutes, assigneeId, projectId };
     const isEditing = state.editingTaskId !== null;
 
     const url = isEditing
@@ -415,7 +425,10 @@ document.getElementById("task-form").addEventListener("submit", async event => {
             body: JSON.stringify(payload)
         });
 
-        showNotice(isEditing ? "Task updated successfully." : "Task created successfully.");
+        showNotice(isEditing
+            ? "Task updated successfully."
+            : "Task created successfully.");
+
         resetTaskForm();
         await loadTasks();
     } catch (error) {
@@ -427,21 +440,7 @@ document.getElementById("task-form").addEventListener("submit", async event => {
 
 document.getElementById("task-cancel-edit").addEventListener("click", resetTaskForm);
 
-document.getElementById("tasks-body").addEventListener("click", async event => {
-    const editButton = event.target.closest("[data-edit-task]");
-    const deleteButton = event.target.closest("[data-delete-task]");
-
-    if (editButton) {
-        startTaskEdit(editButton.dataset.editTask);
-        return;
-    }
-
-    if (deleteButton) {
-        await deleteTask(deleteButton.dataset.deleteTask);
-    }
-});
-
-document.getElementById("recent-tasks-body").addEventListener("click", async event => {
+async function handleTaskAction(event) {
     const editButton = event.target.closest("[data-edit-task]");
     const deleteButton = event.target.closest("[data-delete-task]");
 
@@ -450,7 +449,10 @@ document.getElementById("recent-tasks-body").addEventListener("click", async eve
     } else if (deleteButton) {
         await deleteTask(deleteButton.dataset.deleteTask);
     }
-});
+}
+
+document.getElementById("tasks-body").addEventListener("click", handleTaskAction);
+document.getElementById("recent-tasks-body").addEventListener("click", handleTaskAction);
 
 async function deleteTask(taskId) {
     const task = state.tasks.find(item => String(item.id) === String(taskId));
@@ -653,14 +655,17 @@ async function initializeApp() {
     const results = await Promise.allSettled([
         loadUsers(),
         loadProjects(),
-        loadTasks()
+        loadTasks(),
+        loadVisits()
     ]);
 
     const failedRequests = results.filter(result => result.status === "rejected");
 
     if (failedRequests.length > 0) {
-        const firstError = failedRequests[0].reason;
-        showNotice(firstError.message || "Some data could not be loaded.", true);
+        showNotice(
+            failedRequests[0].reason?.message || "Some data could not be loaded.",
+            true
+        );
     }
 }
 

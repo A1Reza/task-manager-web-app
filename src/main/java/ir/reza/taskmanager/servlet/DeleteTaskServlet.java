@@ -35,6 +35,7 @@ public class DeleteTaskServlet extends HttpServlet {
 
         try {
             String idParameter = request.getParameter("id");
+            /*Reads the id from a query string or form. For example: /tasks/update?id=5*/
 
             if (idParameter == null || idParameter.isBlank()) {
                 JsonUtil.error(response, 400, "Task ID is required.");

@@ -109,7 +109,7 @@ public class AppContextListener implements ServletContextListener {
         );
 
         UserResponseDto user2 = userService.add(
-                new UserRequestDto("Sara", "sara@example.com")
+                new UserRequestDto("Mehrnaz", "Mehrnaz@example.com")
         );
 
         ProjectResponseDto project1 = projectService.add(

@@ -11,12 +11,13 @@
 <body>
 <div class="app-shell">
     <aside class="sidebar">
-        <a class="brand" href="#dashboard" aria-label="TaskFlow home">
+        <a class="brand" href="#dashboard">
             <span class="brand-mark">T</span>
             <span>Task<span class="brand-light">Flow</span></span>
         </a>
 
-        <div class="sidebar-label">WORKSPACE</div>
+        <p class="sidebar-label">WORKSPACE</p>
+
         <nav class="navigation">
             <a href="#dashboard" class="nav-link active" data-page="dashboard">
                 <span class="nav-icon">▦</span> Dashboard
@@ -45,12 +46,12 @@
     <main class="main-content">
         <header class="topbar">
             <div>
-                <div class="eyebrow">WORKSPACE / <span id="breadcrumb">DASHBOARD</span></div>
+                <p class="eyebrow">WORKSPACE / <span id="breadcrumb">DASHBOARD</span></p>
                 <h1 id="page-title">Dashboard</h1>
             </div>
             <div class="topbar-actions">
                 <span class="status-dot"></span>
-                <span class="status-text">Workspace</span>
+                <span class="status-text">Workspace active</span>
                 <div class="avatar">TF</div>
             </div>
         </header>
@@ -62,10 +63,10 @@
             <div class="welcome-row">
                 <div>
                     <h2>Your workspace at a glance</h2>
-                    <p class="muted">Track tasks, people, and projects in one place.</p>
+                    <p class="muted">Track tasks, people, projects, and your session.</p>
                 </div>
                 <button class="button button-primary" id="dashboard-add-task" type="button">
-                    <span>＋</span> New task
+                    ＋ New task
                 </button>
             </div>
 
@@ -78,6 +79,7 @@
                     <div class="stat-number" id="stat-tasks">—</div>
                     <div class="stat-foot">Tasks in your workspace</div>
                 </article>
+
                 <article class="stat-card">
                     <div class="stat-top">
                         <span class="stat-label">Team members</span>
@@ -86,6 +88,7 @@
                     <div class="stat-number" id="stat-users">—</div>
                     <div class="stat-foot">Registered users</div>
                 </article>
+
                 <article class="stat-card">
                     <div class="stat-top">
                         <span class="stat-label">Projects</span>
@@ -94,13 +97,23 @@
                     <div class="stat-number" id="stat-projects">—</div>
                     <div class="stat-foot">Available projects</div>
                 </article>
+
                 <article class="stat-card">
                     <div class="stat-top">
                         <span class="stat-label">Estimated time</span>
                         <span class="stat-icon orange">◷</span>
                     </div>
                     <div class="stat-number" id="stat-minutes">—</div>
-                    <div class="stat-foot">Minutes across all tasks</div>
+                    <div class="stat-foot">Total estimated minutes</div>
+                </article>
+
+                <article class="stat-card session-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Your session visits</span>
+                        <span class="stat-icon pink">↗</span>
+                    </div>
+                    <div class="stat-number" id="stat-visits">—</div>
+                    <div class="stat-foot">Visits recorded in this session</div>
                 </article>
             </div>
 
@@ -111,7 +124,7 @@
                         <p class="muted">A quick look at your current workload.</p>
                     </div>
                     <button class="button button-secondary button-small" type="button"
-                            data-go="tasks">View all tasks <span>→</span></button>
+                            data-go="tasks">View all tasks →</button>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -154,7 +167,7 @@
                     <form id="task-form">
                         <label for="task-title">Task title</label>
                         <input id="task-title" name="title" type="text"
-                               placeholder="e.g. Design database" maxlength="200" required>
+                               maxlength="200" placeholder="e.g. Design database" required>
 
                         <label for="task-minutes">Estimated minutes</label>
                         <input id="task-minutes" name="estimatedMinutes" type="number"
@@ -193,8 +206,8 @@
                     <div class="toolbar">
                         <div class="search-box">
                             <span>⌕</span>
-                            <input id="task-search" type="search" placeholder="Search tasks…"
-                                   aria-label="Search tasks">
+                            <input id="task-search" type="search"
+                                   placeholder="Search tasks…" aria-label="Search tasks">
                         </div>
                         <select id="task-filter-user" aria-label="Filter tasks by user">
                             <option value="">All users</option>
@@ -226,7 +239,7 @@
             <div class="section-intro">
                 <div>
                     <h2>Team members</h2>
-                    <p class="muted">Manage the people who can be assigned tasks.</p>
+                    <p class="muted">Manage people who can be assigned tasks.</p>
                 </div>
             </div>
 
@@ -239,14 +252,15 @@
                         </div>
                         <span class="panel-icon">♙</span>
                     </div>
+
                     <form id="user-form">
                         <label for="user-name">Full name</label>
                         <input id="user-name" name="name" type="text"
-                               placeholder="e.g. Alex Morgan" maxlength="150" required>
+                               maxlength="150" placeholder="e.g. Alex Morgan" required>
 
                         <label for="user-email">Email address</label>
                         <input id="user-email" name="email" type="email"
-                               placeholder="alex@example.com" maxlength="255" required>
+                               maxlength="255" placeholder="alex@example.com" required>
 
                         <button class="button button-primary full-width" type="submit">
                             Add user
@@ -288,10 +302,11 @@
                         </div>
                         <span class="panel-icon">▣</span>
                     </div>
+
                     <form id="project-form">
                         <label for="project-name">Project name</label>
                         <input id="project-name" name="name" type="text"
-                               placeholder="e.g. Website Development" maxlength="150" required>
+                               maxlength="150" placeholder="e.g. Website Development" required>
 
                         <label for="project-description">Description</label>
                         <textarea id="project-description" name="description" rows="5"
