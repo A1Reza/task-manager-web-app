@@ -1,0 +1,8 @@
+### Test EncodingFilter and LoggingFilter
+GET http://localhost:8080/task_manager_war/users
+
+### Test another endpoint
+GET http://localhost:8080/task_manager_war/projects
+
+### Test task page
+GET http://localhost:8080/task_manager_war/tasks
