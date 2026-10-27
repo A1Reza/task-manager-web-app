@@ -1,18 +1,17 @@
-
 ### Get all projects
 GET http://localhost:8080/task_manager_war/projects
+Accept: application/json
 
-### Add a new project
+### Get project by ID
+GET http://localhost:8080/task_manager_war/projects?id=1
+Accept: application/json
+
+### Add project
 POST http://localhost:8080/task_manager_war/projects
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
+Accept: application/json
 
-name=E-Commerce&description=Online shopping application
-
-### Get all projects after adding
-GET http://localhost:8080/task_manager_war/projects
-
-### Add project without a name (should return 400)
-POST http://localhost:8080/task_manager_war/projects
-Content-Type: application/x-www-form-urlencoded
-
-name=&description=Project without a name
+{
+  "name": "E-Commerce",
+  "description": "Online shopping application"
+}

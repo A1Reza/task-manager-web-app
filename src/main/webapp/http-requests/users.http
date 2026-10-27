@@ -1,18 +1,27 @@
-
 ### Get all users
 GET http://localhost:8080/task_manager_war/users
+Accept: application/json
 
-### Add a new user
+### Get user by ID
+GET http://localhost:8080/task_manager_war/users?id=1
+Accept: application/json
+
+### Add user
 POST http://localhost:8080/task_manager_war/users
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
+Accept: application/json
 
-name=Ali&email=ali@example.com
+{
+  "name": "Ali",
+  "email": "ali@example.com"
+}
 
-### Get all users after adding
-GET http://localhost:8080/task_manager_war/users
-
-### Add duplicate email (should return 409)
+### Test duplicate email
 POST http://localhost:8080/task_manager_war/users
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
+Accept: application/json
 
-name=Another Ali&email=ali@example.com
+{
+  "name": "Another Ali",
+  "email": "ali@example.com"
+}

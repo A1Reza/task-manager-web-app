@@ -1,0 +1,39 @@
+### Get all tasks
+GET http://localhost:8080/task_manager_war/tasks
+Accept: application/json
+
+### Get one task
+GET http://localhost:8080/task_manager_war/tasks?id=1
+Accept: application/json
+
+### Filter tasks by assignee
+GET http://localhost:8080/task_manager_war/tasks?assigneeId=1
+Accept: application/json
+
+### Add task
+POST http://localhost:8080/task_manager_war/tasks/add
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "Implement authentication",
+  "estimatedMinutes": 120,
+  "assigneeId": 1,
+  "projectId": 1
+}
+
+### Update task
+PUT http://localhost:8080/task_manager_war/tasks/update?id=1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "Updated task title",
+  "estimatedMinutes": 90,
+  "assigneeId": 2,
+  "projectId": 1
+}
+
+### Delete task
+DELETE http://localhost:8080/task_manager_war/tasks/delete?id=1
+Accept: application/json

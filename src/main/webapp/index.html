@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TaskFlow task management dashboard">
+    <title>TaskFlow | Task Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="#dashboard" aria-label="TaskFlow home">
+            <span class="brand-mark">T</span>
+            <span>Task<span class="brand-light">Flow</span></span>
+        </a>
+
+        <div class="sidebar-label">WORKSPACE</div>
+        <nav class="navigation">
+            <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                <span class="nav-icon">▦</span> Dashboard
+            </a>
+            <a href="#tasks" class="nav-link" data-page="tasks">
+                <span class="nav-icon">☑</span> Tasks
+            </a>
+            <a href="#users" class="nav-link" data-page="users">
+                <span class="nav-icon">♙</span> Users
+            </a>
+            <a href="#projects" class="nav-link" data-page="projects">
+                <span class="nav-icon">▣</span> Projects
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-note">
+                <span class="note-icon">✦</span>
+                <strong>Stay organized</strong>
+                <p>Keep your tasks and projects moving forward.</p>
+            </div>
+            <span class="sidebar-version">TASKFLOW · TASK MANAGER</span>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">WORKSPACE / <span id="breadcrumb">DASHBOARD</span></div>
+                <h1 id="page-title">Dashboard</h1>
+            </div>
+            <div class="topbar-actions">
+                <span class="status-dot"></span>
+                <span class="status-text">Workspace</span>
+                <div class="avatar">TF</div>
+            </div>
+        </header>
+
+        <div id="notice" class="notice hidden" role="status" aria-live="polite"></div>
+
+        <!-- Dashboard -->
+        <section class="page-section" id="page-dashboard">
+            <div class="welcome-row">
+                <div>
+                    <h2>Your workspace at a glance</h2>
+                    <p class="muted">Track tasks, people, and projects in one place.</p>
+                </div>
+                <button class="button button-primary" id="dashboard-add-task" type="button">
+                    <span>＋</span> New task
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Total tasks</span>
+                        <span class="stat-icon purple">☑</span>
+                    </div>
+                    <div class="stat-number" id="stat-tasks">—</div>
+                    <div class="stat-foot">Tasks in your workspace</div>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Team members</span>
+                        <span class="stat-icon blue">♙</span>
+                    </div>
+                    <div class="stat-number" id="stat-users">—</div>
+                    <div class="stat-foot">Registered users</div>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Projects</span>
+                        <span class="stat-icon green">▣</span>
+                    </div>
+                    <div class="stat-number" id="stat-projects">—</div>
+                    <div class="stat-foot">Available projects</div>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-label">Estimated time</span>
+                        <span class="stat-icon orange">◷</span>
+                    </div>
+                    <div class="stat-number" id="stat-minutes">—</div>
+                    <div class="stat-foot">Minutes across all tasks</div>
+                </article>
+            </div>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Recent tasks</h2>
+                        <p class="muted">A quick look at your current workload.</p>
+                    </div>
+                    <button class="button button-secondary button-small" type="button"
+                            data-go="tasks">View all tasks <span>→</span></button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>TASK</th>
+                            <th>ASSIGNEE</th>
+                            <th>PROJECT</th>
+                            <th>EST. TIME</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                        </thead>
+                        <tbody id="recent-tasks-body">
+                        <tr><td colspan="5" class="empty-cell">Loading tasks…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- Tasks -->
+        <section class="page-section hidden" id="page-tasks">
+            <div class="section-intro">
+                <div>
+                    <h2>Task management</h2>
+                    <p class="muted">Create tasks, assign team members, and connect projects.</p>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <section class="panel form-panel" id="task-form-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2 id="task-form-title">Create a task</h2>
+                            <p class="muted">Enter the task details below.</p>
+                        </div>
+                        <span class="panel-icon">＋</span>
+                    </div>
+
+                    <form id="task-form">
+                        <label for="task-title">Task title</label>
+                        <input id="task-title" name="title" type="text"
+                               placeholder="e.g. Design database" maxlength="200" required>
+
+                        <label for="task-minutes">Estimated minutes</label>
+                        <input id="task-minutes" name="estimatedMinutes" type="number"
+                               min="1" step="1" placeholder="e.g. 120" required>
+
+                        <label for="task-assignee">Assign to</label>
+                        <select id="task-assignee" name="assigneeId" required>
+                            <option value="">Select a user</option>
+                        </select>
+
+                        <label for="task-project">Project</label>
+                        <select id="task-project" name="projectId" required>
+                            <option value="">Select a project</option>
+                        </select>
+
+                        <div class="form-actions">
+                            <button class="button button-primary" id="task-submit" type="submit">
+                                Create task
+                            </button>
+                            <button class="button button-secondary hidden" id="task-cancel-edit"
+                                    type="button">Cancel</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="panel task-list-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>All tasks</h2>
+                            <p class="muted"><span id="task-count">0</span> tasks found</p>
+                        </div>
+                        <button class="button button-secondary button-small" id="refresh-tasks"
+                                type="button">↻ Refresh</button>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="search-box">
+                            <span>⌕</span>
+                            <input id="task-search" type="search" placeholder="Search tasks…"
+                                   aria-label="Search tasks">
+                        </div>
+                        <select id="task-filter-user" aria-label="Filter tasks by user">
+                            <option value="">All users</option>
+                        </select>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>TASK</th>
+                                <th>ASSIGNEE</th>
+                                <th>PROJECT</th>
+                                <th>EST. TIME</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tasks-body">
+                            <tr><td colspan="5" class="empty-cell">Loading tasks…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <!-- Users -->
+        <section class="page-section hidden" id="page-users">
+            <div class="section-intro">
+                <div>
+                    <h2>Team members</h2>
+                    <p class="muted">Manage the people who can be assigned tasks.</p>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <section class="panel form-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Add a user</h2>
+                            <p class="muted">Register a team member.</p>
+                        </div>
+                        <span class="panel-icon">♙</span>
+                    </div>
+                    <form id="user-form">
+                        <label for="user-name">Full name</label>
+                        <input id="user-name" name="name" type="text"
+                               placeholder="e.g. Alex Morgan" maxlength="150" required>
+
+                        <label for="user-email">Email address</label>
+                        <input id="user-email" name="email" type="email"
+                               placeholder="alex@example.com" maxlength="255" required>
+
+                        <button class="button button-primary full-width" type="submit">
+                            Add user
+                        </button>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>All users</h2>
+                            <p class="muted">Registered team members.</p>
+                        </div>
+                        <button class="button button-secondary button-small" id="refresh-users"
+                                type="button">↻ Refresh</button>
+                    </div>
+                    <div id="users-list" class="entity-list">
+                        <div class="empty-state">Loading users…</div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <!-- Projects -->
+        <section class="page-section hidden" id="page-projects">
+            <div class="section-intro">
+                <div>
+                    <h2>Projects</h2>
+                    <p class="muted">Organize tasks around shared goals.</p>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <section class="panel form-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Create a project</h2>
+                            <p class="muted">Add a project to your workspace.</p>
+                        </div>
+                        <span class="panel-icon">▣</span>
+                    </div>
+                    <form id="project-form">
+                        <label for="project-name">Project name</label>
+                        <input id="project-name" name="name" type="text"
+                               placeholder="e.g. Website Development" maxlength="150" required>
+
+                        <label for="project-description">Description</label>
+                        <textarea id="project-description" name="description" rows="5"
+                                  maxlength="1000"
+                                  placeholder="What is this project about?"></textarea>
+
+                        <button class="button button-primary full-width" type="submit">
+                            Create project
+                        </button>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>All projects</h2>
+                            <p class="muted">Projects in your workspace.</p>
+                        </div>
+                        <button class="button button-secondary button-small" id="refresh-projects"
+                                type="button">↻ Refresh</button>
+                    </div>
+                    <div id="projects-list" class="entity-list">
+                        <div class="empty-state">Loading projects…</div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span>TaskFlow</span>
+            <span>Simple planning. Clear progress.</span>
+        </footer>
+    </main>
+</div>
+</body>
+</html>
